@@ -1,9 +1,0 @@
-[{"FilePath":"/var/folders/1h/tkhbnmnn53l9lp4f8nzj94t40000gp/T//RtmpCXPrGy/5190c4411a58f6fc7f94046a/0", 
-                          "Entity1_Col": "entity1", 
-                          "Entity2_Col":"entity2",
-                          "Type1_Col":"type1",
-                          "Type2_Col":"type2",
-                          "Type_colors":[{"Entity":"Chemical","Color":"#2438A6"},{"Entity":"Disease","Color":"#1A6E39"},{"Entity":"Protein","Color":"#94511B"}],
-                          "community_color":"#D4379A",
-                          "community_threshold":"400"
-                          }]
