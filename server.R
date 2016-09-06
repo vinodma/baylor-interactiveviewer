@@ -317,6 +317,7 @@ function(input, output, session){
     sortedlabel<-NULL
     #labelfreq <- lapply(rawlabels,table)
     proteins<-global$nodes[global$nodes$Type=="Protein","Name"]
+    print("Printing Proteins ..")
     #print(proteins)
     
     # This takes forever. If we can load a previously built object do it; otherwise don't hold your breath
@@ -333,12 +334,21 @@ function(input, output, session){
       }
     })
     lapply(proteins,appendlabel)
-    labelfreq <- table(protienDSpathway)
-    z<-apply(labelfreq,1,sum)
-    sortedlabel<-labelfreq[order(as.numeric(z), decreasing=TRUE),]
-    colnames(sortedlabel) <- colnames(labelfreq)
-    x<-as.data.frame(sortedlabel,row.names = rownames(sortedlabel),stringsAsFactors=FALSE)
-    table<-x
+    
+    table <- data.frame(Protein="No pathway data available")
+    
+    if (nrow(protienDSpathway)>1){
+      labelfreq <- table(protienDSpathway)
+      if (ncol(labelfreq)>1){
+        z<-apply(labelfreq,1,sum)
+        sortedlabel<-labelfreq[order(as.numeric(z), decreasing=TRUE),]
+        table<-as.data.frame.matrix(sortedlabel)
+      } else {
+        table <- as.data.frame.matrix(labelfreq)
+      }
+      row.names(table) <- strtrim(row.names(table), 50)
+    } 
+    table
   },
   rownames = TRUE,
   selection = "single")
