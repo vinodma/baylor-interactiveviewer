@@ -62,11 +62,11 @@ body <- dashboardBody(
             tabPanel("Disease Pathway Info.", 
                      tabBox(width=500,title="",id="pathinfo",
                             tabPanel("Data",fluidRow(splitLayout(cellWidths = c("100%", "0%"), DT::dataTableOutput("plotgraph1"))
-                            )),
-                            tabPanel("Heatmap",plotlyOutput("plotgraph2"))
+                            ))
+                            #,tabPanel("Heatmap",plotlyOutput("plotgraph2"))
                      )
     ),
-    tabPanel("App. Options,",
+    tabPanel("App. Options",
              tabBox(width=500,title="",id="fileinfo",
                     tabPanel("EdgeListFile",
                           fileInput('file1', 'Choose file to upload',
