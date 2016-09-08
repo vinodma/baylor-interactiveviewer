@@ -76,8 +76,7 @@ box(
 textInput("searchentitiy","Search Entity"),
 actionButton("search_button","Search")
 )
-))
-),
+)),
 tabItem(tabName = "appoptions",
                  tabBox(width=500,title="",id="fileinfo",
                         tabPanel("EdgeListFile",
@@ -132,7 +131,7 @@ tabItem(tabName = "appoptions",
                  )
                  
         
-)
+))
 )
 
 dashboardPage(header, sidebar, body, skin = "blue")
