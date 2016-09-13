@@ -22,13 +22,13 @@ sortedlabel<-NULL
 protienDSpathway<<-data.frame()
 
 lbllist<<-NULL
-
+is_comm_graph <- TRUE
 colormapping<-data.frame(Entity=character(),Color=character(),stringsAsFactors = FALSE)
 
 
 function(input, output, session){ 
   global <- reactiveValues()
-  global$is_comm_graph = TRUE
+  
   global$viz_stack <- insert_top(s1, list(graph, communities))
   global$name <- insert_top(s2, "")
   
@@ -131,7 +131,7 @@ function(input, output, session){
     graph <- data[[1]]
     communities <- data[[2]]
     memcomm <- NULL
-    if (global$is_comm_graph){
+    if (is_comm_graph){
       ii<-1
       for(elm in unlist(searchelm)){
         print(elm)
@@ -173,7 +173,7 @@ function(input, output, session){
   
   # on-click from sigma.js
   observeEvent(input$comm_id, {
-    if (global$is_comm_graph){
+    if (is_comm_graph){
       data <- peek_top(global$viz_stack)
       graph <- data[[1]]
       communities <- data[[2]]
@@ -187,7 +187,7 @@ function(input, output, session){
       
       searchelm=input$searchentitiy
       memcomm <- NULL
-      if (global$is_comm_graph){
+      if (is_comm_graph){
         ii<-1
         for(elm in unlist(searchelm)){
           if(length(which(elm== V(graph)$name)) != 0){
@@ -215,14 +215,14 @@ function(input, output, session){
     data <- peek_top(global$viz_stack)    
     graph <- data[[1]]
     communities <- data[[2]]
-    print(global$is_comm_graph)
+    print(is_comm_graph)
     # Try and apply community detection if there are a lot of nodes to visualize
     #print(vcount(graph))
     #print(conf$community_threshold)
     if (vcount(graph) >  as.numeric(conf$community_threshold)){
       community_graph <- get_community_graph(graph, communities)
       if (vcount(community_graph) > 1){ 
-        global$is_comm_graph <- TRUE
+        is_comm_graph <<- TRUE
         return(list(community_graph, TRUE))
       }
     } 
@@ -230,7 +230,7 @@ function(input, output, session){
     # If we have few enough nodes (or would have just 1 (sub)community) visualize as is
     V(graph)$size <- 1
     #Temporary fix for the issue when the entities show up twice in the viewer
-    #global$is_comm_graph <- FALSE
+    is_comm_graph <<- FALSE
     
     # Remove nodes we aren't we don't want that type of node    
     dellist <- c()
