@@ -41,7 +41,7 @@ function(input, output, session){
       return(NULL)
     
     dat <- read.csv(inFile$datapath, header = input$header,
-             sep = input$sep, quote = input$quote)
+                    sep = input$sep, quote = input$quote)
     
     updateSelectInput(session,"entity1",choices = colnames(dat))
     updateSelectInput(session,"entity2",choices = colnames(dat))
@@ -68,7 +68,7 @@ function(input, output, session){
     
     print(input[["entcolors"]])
     print(input[["entcol"]])
-
+    
     colormapping <<- rbind(colormapping,data.frame(Entity=toString(input[["entcolors"]]),Color=toString(input[["entcol"]])))
     output$enttable <- renderTable(colormapping)
   })
@@ -80,14 +80,14 @@ function(input, output, session){
     fpath<-input$file1$datapath
     typecolors<-toJSON(colormapping)
     elements_list = sprintf('[{"FilePath":"%s", 
-                          "Entity1_Col": "%s", 
-                          "Entity2_Col":"%s",
-                          "Type1_Col":"%s",
-                          "Type2_Col":"%s",
-                          "Type_colors":%s,
-                          "community_color":"%s",
-                          "community_threshold":"%s"
-                          }]', fpath, input$entity1,input$entity2, input$type1,input$type2, typecolors, input$community_col,input$comm_size)
+                            "Entity1_Col": "%s", 
+                            "Entity2_Col":"%s",
+                            "Type1_Col":"%s",
+                            "Type2_Col":"%s",
+                            "Type_colors":%s,
+                            "community_color":"%s",
+                            "community_threshold":"%s"
+  }]', fpath, input$entity1,input$entity2, input$type1,input$type2, typecolors, input$community_col,input$comm_size)
     
     print(elements_list)
     #conf1<-fromJSON(elements_list)
@@ -98,14 +98,14 @@ function(input, output, session){
     conf <<- fromJSON("./www/data/config_1.json")
     resetgraph(conf)
     
-  })
+})
   
   
   # reset button
   observeEvent(input$reset_button, {
     
     resetgraph(conf)
-
+    
   })
   
   resetgraph<-function(conf)
@@ -143,7 +143,7 @@ function(input, output, session){
       memcommunity <- input$searchentitiy
       
     }
-   
+    
     observe({
       session$sendCustomMessage(type = "commmemmsg" ,
                                 message = list(id=memcommunity))
@@ -191,8 +191,8 @@ function(input, output, session){
         ii<-1
         for(elm in unlist(searchelm)){
           if(length(which(elm== V(graph)$name)) != 0){
-          memcomm[ii] <-  communities$membership[which(elm== V(graph)$name)]
-          ii<-ii+1
+            memcomm[ii] <-  communities$membership[which(elm== V(graph)$name)]
+            ii<-ii+1
           }
         }
         memcommunity<-paste(memcomm,collapse = ",")
@@ -229,8 +229,9 @@ function(input, output, session){
     
     # If we have few enough nodes (or would have just 1 (sub)community) visualize as is
     V(graph)$size <- 1
-    global$is_comm_graph <- FALSE
-
+    #Temporary fix for the issue when the entities show up twice in the viewer
+    #global$is_comm_graph <- FALSE
+    
     # Remove nodes we aren't we don't want that type of node    
     dellist <- c()
     indx <- 1
@@ -367,4 +368,4 @@ function(input, output, session){
     plot_ly(z = sortedlabel,x=colnames(sortedlabel),y=rownames(sortedlabel), type = "heatmap",hoverinfo = "text",
             text = paste(colnames(sortedlabel),rownames(sortedlabel)),colorscale = "Hot") %>% layout(xaxis = list(title="Proteins"),yaxis=list(title="Disease Pathway"))
   })
-}
+  }
