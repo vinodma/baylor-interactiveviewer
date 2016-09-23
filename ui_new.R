@@ -48,6 +48,12 @@ body <- dashboardBody(
                                       selectInput("type2","Entity2 Type Column:",c()),
                                       actionButton("entitymapping_button", "Done")
                              ),
+                             tabPanel("Define Entity interactions",
+                                      selectInput("entintr1","Select entity 1",choices=c()),
+                                      selectInput("entintr2","Select entity 2",choices=c()),
+                                      actionButton("entintrdone","Assign interaction"),
+                                      tableOutput("entintrtable")
+                             ),
                              tabPanel("Entity colors",
                                       selectInput("entcolors","Select entity",choices=c()),
                                       colourInput("entcol","Select entity color"),
@@ -134,12 +140,7 @@ dashboardPage(
       hr(),
       actionButton("back_button", "Back"),
       actionButton("reset_button", "Reset"),  
-      radioButtons("interactions", "Show interactions:",
-                   c("All" = "all",
-                     "Protein-Protein" = "Protein-Protein",
-                     "Protein-Disease" = "Protein-Disease",
-                     "Protein-Chemical" = "Protein-Chemical",
-                     "Chemical-Disease" = "Chemical-Disease")),
+      radioButtons("interactions","Show Interactions:",choices=c(0)),
       
       
       #fluidRow(column(3, verbatimTextOutput("value"))),
