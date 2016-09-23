@@ -24,7 +24,7 @@ protienDSpathway<<-data.frame()
 lbllist<<-NULL
 is_comm_graph <- TRUE
 colormapping<-data.frame(Entity=character(),Color=character(),stringsAsFactors = FALSE)
-
+interactionmapping<-data.frame(Entity1=character(),Entity2=character(),stringsAsFactors = FALSE)
 
 function(input, output, session){ 
   global <- reactiveValues()
@@ -60,7 +60,13 @@ function(input, output, session){
     x1<-unique(unlist(strsplit(x,",")))
     #x<-unique(append(toString(unlist(unique((dat[,input$type1])))),toString(unlist(unique((dat[,input$type2]))))))
     updateSelectInput(session,"entcolors",choices = x1)
+    updateSelectInput(session,"entintr1",choices=x1)
+    updateSelectInput(session,"entintr2",choices=x1)
+    
   })
+  
+  
+  
   
   #set entity color button
   
@@ -74,20 +80,47 @@ function(input, output, session){
   })
   
   
+  #set entity interacton button
+  
+  observeEvent(input$entintrdone,{
+    
+    #print(input[["entintr1"]])
+    #print(input[["entintr2"]])
+    
+
+    if(nrow(interactionmapping) >0){
+      
+      comb1 <- sum(grepl(input[["entintr1"]],interactionmapping$Entity1))
+      comb2 <- sum(grepl(input[["entintr2"]],interactionmapping$Entity2))
+      comb3 <-sum(grepl(input[["entintr1"]],interactionmapping$Entity2))
+      comb4<-sum(grepl(input[["entintr2"]],interactionmapping$Entity1))
+    
+      if((comb1>0)&&(comb2>0))
+        return(NULL)
+      if((comb3>0)&&(comb4>0))
+        return(NULL)
+    }
+    interactionmapping <<- rbind(interactionmapping,data.frame(Entity1=toString(input[["entintr1"]]),Entity2=toString(input[["entintr2"]])))
+    output$entintrtable <- renderTable(interactionmapping)
+  })
+  
+  
   #saveoptionscsv event
   
   observeEvent(input$saveoptionscsv,{
     fpath<-input$file1$datapath
     typecolors<-toJSON(colormapping)
+    interactions <- toJSON(interactionmapping)
     elements_list = sprintf('[{"FilePath":"%s", 
                             "Entity1_Col": "%s", 
                             "Entity2_Col":"%s",
                             "Type1_Col":"%s",
                             "Type2_Col":"%s",
                             "Type_colors":%s,
+                            "Interactions":%s,
                             "community_color":"%s",
                             "community_threshold":"%s"
-  }]', fpath, input$entity1,input$entity2, input$type1,input$type2, typecolors, input$community_col,input$comm_size)
+  }]', fpath, input$entity1,input$entity2, input$type1,input$type2, typecolors,interactions, input$community_col,input$comm_size)
     
     print(elements_list)
     #conf1<-fromJSON(elements_list)
@@ -116,6 +149,18 @@ function(input, output, session){
     global$viz_stack <- rstack()
     global$viz_stack <- insert_top(global$viz_stack, list(graph, communities))
     global$name <- insert_top(s2, "")
+    
+    
+      z<-c()
+      itr<-1
+      for(ii in x$Entity1){
+        pastestr=paste0(ii,"-",x$Entity2[itr],sep="")
+        z[itr] <- c(pastestr=pastestr)
+        itr<-itr+1
+      }
+      z[itr] <- paste0("all"="All")
+    #chcs <- paste(z,collapse = ",")
+      updateRadioButtons(session,"interactions",label="Show Interactions:",choices=z,selected="All")
   }
   
   
@@ -229,13 +274,13 @@ function(input, output, session){
     
     # If we have few enough nodes (or would have just 1 (sub)community) visualize as is
     V(graph)$size <- 1
-    #Temporary fix for the issue when the entities show up twice in the viewer
     is_comm_graph <<- FALSE
     
     # Remove nodes we aren't we don't want that type of node    
     dellist <- c()
     indx <- 1
-    if(input$interactions == "all")
+    
+    if(input$interactions == "All")
       return(list(graph, FALSE))
     
     for(nd in V(graph)){
@@ -369,3 +414,4 @@ function(input, output, session){
             text = paste(colnames(sortedlabel),rownames(sortedlabel)),colorscale = "Hot") %>% layout(xaxis = list(title="Proteins"),yaxis=list(title="Disease Pathway"))
   })
   }
+
