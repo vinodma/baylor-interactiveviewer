@@ -150,7 +150,7 @@ function(input, output, session){
     global$viz_stack <- insert_top(global$viz_stack, list(graph, communities))
     global$name <- insert_top(s2, "")
     
-    
+    x<-as.data.frame(conf$Interactions)
       z<-c()
       itr<-1
       for(ii in x$Entity1){
@@ -414,4 +414,3 @@ function(input, output, session){
             text = paste(colnames(sortedlabel),rownames(sortedlabel)),colorscale = "Hot") %>% layout(xaxis = list(title="Proteins"),yaxis=list(title="Disease Pathway"))
   })
   }
-
