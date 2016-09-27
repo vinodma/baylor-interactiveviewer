@@ -130,8 +130,9 @@ dashboardPage(
     ),
     conditionalPanel(
       condition = "input.tabvals == 2",
-      p("Communities are ", span("blue", style = "color:#2A9FD6")), 
-      p("Entities are ",  span("green", style = "color:#FF8800")),
+      uiOutput("legend"),
+      #p("Communities are ", span("blue", style = "color:#2A9FD6")), 
+      #p("Entities are ",  span("green", style = "color:#FF8800")),
       # p("Chemicals are ", span("orange", style = "color:#FF8800")), 
       #p(" are ", span("red", style = "color:#CC0000")),
       selectInput("select", label = h5("Select algorithm"), 
