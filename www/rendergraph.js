@@ -16,8 +16,11 @@
 						
                         JSON.parse(JSON.stringify(message), function(k, v) {
                             if (k == "id") {
-								elems = v.split(",")
+								
+								elems = String(v).split(",");
+								
                                 s.graph.nodes().forEach(function(node, i, a) {
+									
 									node.color = node.originalcolor;
 									for (var ix = 0; ix < elems.length; ix++) {
 										elem = elems[ix];
