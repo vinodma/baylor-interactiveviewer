@@ -20,11 +20,13 @@ s3 <- rstack()
 mp <<- NULL
 sortedlabel<-NULL
 protienDSpathway<<-data.frame()
-
+disptable<<-NULL
 lbllist<<-NULL
 is_comm_graph <- TRUE
 colormapping<-data.frame(Entity=character(),Color=character(),stringsAsFactors = FALSE)
 interactionmapping<-data.frame(Entity1=character(),Entity2=character(),stringsAsFactors = FALSE)
+uniqueentities <<- NULL
+
 
 function(input, output, session){ 
   global <- reactiveValues()
@@ -57,11 +59,11 @@ function(input, output, session){
     print(input$type1)
     #x<-unique(rbind(dat[,input$type1],dat[,input$type2]))
     x<-paste(dat[,"type1"],dat[,"type2"],collapse = ",",sep=",")
-    x1<-unique(unlist(strsplit(x,",")))
+    uniqueentities<<-unique(unlist(strsplit(x,",")))
     #x<-unique(append(toString(unlist(unique((dat[,input$type1])))),toString(unlist(unique((dat[,input$type2]))))))
-    updateSelectInput(session,"entcolors",choices = x1)
-    updateSelectInput(session,"entintr1",choices=x1)
-    updateSelectInput(session,"entintr2",choices=x1)
+    updateSelectInput(session,"entcolors",choices = uniqueentities)
+    updateSelectInput(session,"entintr1",choices=uniqueentities)
+    updateSelectInput(session,"entintr2",choices=uniqueentities)
     
   })
   
@@ -71,9 +73,9 @@ function(input, output, session){
   #set entity color button
   
   observeEvent(input$entdone,{
-    
-    print(input[["entcolors"]])
-    print(input[["entcol"]])
+    print(uniqueentities)
+    #print(input[["entcolors"]])
+    #print(input[["entcol"]])
     
     colormapping <<- rbind(colormapping,data.frame(Entity=toString(input[["entcolors"]]),Color=toString(input[["entcol"]])))
     output$enttable <- renderTable(colormapping)
@@ -109,6 +111,15 @@ function(input, output, session){
   
   observeEvent(input$saveoptionscsv,{
     fpath<-input$file1$datapath
+    
+    for(ent in uniqueentities){
+      print(ent)
+      if(nrow(colormapping[colormapping$Entity==ent,]) == 0){
+        colormapping <<- rbind(colormapping,data.frame(Entity=ent,Color=rgb(runif(1),runif(1),runif(1))))
+      }
+    }
+    
+    
     typecolors<-toJSON(colormapping)
     interactions <- toJSON(interactionmapping)
     elements_list = sprintf('[{"FilePath":"%s", 
@@ -151,6 +162,7 @@ function(input, output, session){
     global$name <- insert_top(s2, "")
     
     x<-as.data.frame(conf$Interactions)
+    
       z<-c()
       itr<-1
       for(ii in x$Entity1){
@@ -161,8 +173,26 @@ function(input, output, session){
       z[itr] <- paste0("all"="All")
     #chcs <- paste(z,collapse = ",")
       updateRadioButtons(session,"interactions",label="Show Interactions:",choices=z,selected="All")
+      
+      print(input$community_col)
+      output$legend<- renderUI({
+        
+        cm<-p("Communities are ", span(input$community_col, style = paste("color:",input$community_col,sep="")))
+        z<-apply(colormapping,1, processrow)
+        return(append(z,cm))
+      })
+      
+      
+      
   }
   
+  processrow<-function (elm)
+  {
+    #print(elm[1])
+    #print(elm[2])
+    p(paste(toString(elm[1]), "'s are ",sep=""), span(toString(elm[2]), style = paste("color:",toString(elm[2]),sep="")))
+  
+    }
   
   observeEvent(input$variable, {
     #print(input$variable)
@@ -195,11 +225,31 @@ function(input, output, session){
     })
   })
   
+  # disease pathway table click
+  observe({
+    row <- input$plotgraph1_rows_selected
+    val<-disptable[as.numeric(row),]
+    if(is.null(val)){
+      return(NULL)
+    }
+    z<-apply(val,1,function(x) which(x==max(x)))
+    print(rownames(z))
+    last_selected_row = tail(row, n=1)
+    
+    
+      #proteins<-protienDSpathway[protienDSpathway$Pathway==unlist(last_selected_row),]$Protein
+      #print(proteins)
+      session$sendCustomMessage(type = "commmemmsg" ,
+                                message = list(id=paste(rownames(z),collapse=",")))
+    
+  })
+  
+  
   # table click
   observe({
     row <- input$degree_table_rows_selected
     if (length(row)){
-      #print(row)
+      print(row)
       session$sendCustomMessage(type = "commmemmsg" ,
                                 message = list(id=tail(row, n=1)))
     }
@@ -388,13 +438,13 @@ function(input, output, session){
       if (ncol(labelfreq)>1){
         z<-apply(labelfreq,1,sum)
         sortedlabel<-labelfreq[order(as.numeric(z), decreasing=TRUE),]
-        table<-as.data.frame.matrix(sortedlabel)
+        disptable<<-as.data.frame.matrix(sortedlabel)
       } else {
-        table <- as.data.frame.matrix(labelfreq)
+        disptable <<- as.data.frame.matrix(labelfreq)
       }
-      row.names(table) <- strtrim(row.names(table), 50)
+      row.names(disptable) <<- strtrim(row.names(disptable), 50)
     } 
-    table
+    disptable
   },
   rownames = TRUE,
   selection = "single")
